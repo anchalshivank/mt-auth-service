@@ -55,11 +55,6 @@ jobs:
 
       - name: SSH into GCP VM and deploy
         run: |
-          ssh -i ~/.ssh/id_rsa -T anchalshivank99@34.133.145.146 <<EOF
-            docker pull anchalshivank99/mt-auth-service:latest
-            docker stop auth-service || true
-            docker rm auth-service || true
-            docker run -d -p 8080:8080 --name auth-service anchalshivank99/mt-auth-service:latest
-          EOF
+          ssh -i ~/.ssh/id_rsa -T anchalshivank99@34.133.145.146 ' ./deploy_auth_service.sh'
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
