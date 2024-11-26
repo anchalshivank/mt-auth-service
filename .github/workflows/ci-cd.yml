@@ -37,7 +37,9 @@ jobs:
     steps:
       - name: SSH into GCP VM and deploy
         run: |
-          ssh -o StrictHostKeyChecking=no anchalshivank99@34.133.145.146 <<EOF
+          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          ssh -i private_key.pem -o StrictHostKeyChecking=no anchalshivank99@34.133.145.146 <<EOF
             docker pull anchalshivank99/mt-auth-service:latest
             docker stop auth-service
             docker rm auth-service
