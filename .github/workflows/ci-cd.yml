@@ -43,11 +43,14 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/id_rsa
           ssh-keyscan -t rsa 34.133.145.146 >> ~/.ssh/known_hosts
+
 
       - name: SSH into GCP VM and deploy
         run: |
-          ssh -i ~/.ssh/id_rsa anchalshivank99@34.133.145.146 <<EOF
+          ssh -i ~/.ssh/id_rsa -T anchalshivank99@34.133.145.146 <<EOF
             docker pull anchalshivank99/mt-auth-service:latest
             docker stop auth-service || true
             docker rm auth-service || true
