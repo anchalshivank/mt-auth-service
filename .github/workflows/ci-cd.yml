@@ -37,11 +37,11 @@ jobs:
     steps:
       - name: SSH into GCP VM and deploy
         run: |
-          ssh -o StrictHostKeyChecking=no user@your-vm-ip <<EOF
-            docker pull yourusername/your-image-name:latest
-            docker stop old-container
-            docker rm old-container
-            docker run -d -p 80:80 --name new-container yourusername/your-image-name:latest
+          ssh -o StrictHostKeyChecking=no mt-backend@34.133.145.146 <<EOF
+            docker pull anchalshivank99/mt-auth-service:latest
+            docker stop auth-service
+            docker rm auth-service
+            docker run -d -p 8080:8080 --name auth-service anchalshivank99/mt-auth-service:latest
           EOF
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
