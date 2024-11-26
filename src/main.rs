@@ -1,3 +1,4 @@
+use std::net::SocketAddr;
 use ntex::http::RequestHead;
 use ntex::web;
 use ntex::web::{App, HttpResponse, HttpServer};
@@ -48,6 +49,8 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_BACKTRACE", "1");
     env_logger::init();
 
+    let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
+
     HttpServer::new(||{
         let logger  = Logger::default();
 
@@ -57,6 +60,6 @@ async fn main() -> std::io::Result<()> {
             .service(register)
             .wrap(logger)
         }
-    ).bind(("127.0.0.1", 8080))?.run().await
+    ).bind(addr)?.run().await
 
 }
