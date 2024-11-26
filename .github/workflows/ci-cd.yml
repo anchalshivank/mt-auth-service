@@ -40,13 +40,13 @@ jobs:
 
       - name: Debug SSH key (do not print private key!)
         run: |
-          echo "$SSH_PRIVATE_KEY" | head -n 10 # Show only the first 10 lines, never the full key
+          echo "${{secrets.SSH_PRIVATE_KEY}}" | head -n 10 # Show only the first 10 lines, never the full key
 
 
       - name: Set up SSH key using ssh-agent
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          echo "${{secrets.SSH_PRIVATE_KEY}}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           eval $(ssh-agent -s)
           ssh-add ~/.ssh/id_rsa
