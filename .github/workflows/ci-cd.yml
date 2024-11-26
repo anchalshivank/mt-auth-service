@@ -55,6 +55,6 @@ jobs:
 
       - name: SSH into GCP VM and deploy
         run: |
-          ssh -i ~/.ssh/id_rsa -T anchalshivank99@34.133.145.146 ' ./deploy_auth_service.sh'
+          ssh -i ~/.ssh/id_rsa -T anchalshivank99@34.133.145.146 './deploy_auth_service.sh'
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
