@@ -35,14 +35,19 @@ jobs:
     needs: build
 
     steps:
-      - name: Set up SSH key
+      - name: Check out the code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH key using ssh-agent
         run: |
-          echo "$SSH_PRIVATE_KEY" > private_key.pem
-          chmod 600 private_key.pem
+          echo "$SSH_PRIVATE_KEY" | ssh-add - > /dev/null
+          mkdir -p ~/.ssh
+          touch ~/.ssh/known_hosts
+          ssh-keyscan -H 34.133.145.146 >> ~/.ssh/known_hosts
 
       - name: SSH into GCP VM and deploy
         run: |
-          ssh -i private_key.pem -o StrictHostKeyChecking=no anchalshivank99@34.133.145.146 <<EOF
+          ssh -o StrictHostKeyChecking=no anchalshivank99@34.133.145.146 <<EOF
             docker pull anchalshivank99/mt-auth-service:latest
             docker stop auth-service || true
             docker rm auth-service || true
