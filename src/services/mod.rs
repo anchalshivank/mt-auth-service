@@ -11,8 +11,6 @@ use ntex::web::error::BlockingError;
 use ntex::web::types::Json;
 use std::sync::{Arc, Mutex};
 
-pub mod login;
-pub mod register;
 
 #[derive(Clone)]
 pub struct UserService {
