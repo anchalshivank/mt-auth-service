@@ -1,0 +1,9 @@
+# For documentation on how to configure this file,
+# see https://diesel.rs/guides/configuring-diesel-cli
+
+[print_schema]
+file = "src/schema.rs"
+custom_type_derives = ["diesel::query_builder::QueryId", "Clone"]
+
+[migrations_directory]
+dir = "/media/anchalshivank/d628748b-bd5d-418e-9d39-e3227a48b39d/MaxTech/backend/auth-service/migrations"

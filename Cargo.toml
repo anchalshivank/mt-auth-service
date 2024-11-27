@@ -11,3 +11,7 @@ serde_json = "1.0.133"
 bcrypt = "0.16.0"
 dotenv = "0.15.0"
 tokio-postgres = {version = "0.7.12", features = ["default"]}
+r2d2 = "0.8.10"
+diesel = {version = "2.2.5", features = ["postgres","r2d2"]}
+uuid = "1.11.0"
+r2d2_postgres = "0.18.1"
