@@ -18,8 +18,6 @@ use ntex::web::{App, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
-use ntex::web;
-use ntex::web::types::State;
 
 #[ntex::main]
 async fn main() -> std::io::Result<()> {
@@ -29,7 +27,7 @@ async fn main() -> std::io::Result<()> {
     let addr = SocketAddr::from(([0, 0, 0, 0], 8082));
 
     let user_repository = Arc::new(Mutex::new(UserRepository::new(pool.clone())));
-    let user_service = UserService::new(user_repository);
+    let user_service = Arc::new(Mutex::new(UserService::new(user_repository)));
 
     HttpServer::new(move || {
         App::new()

@@ -1,3 +1,4 @@
+use std::sync::{Arc, Mutex};
 use crate::models::login::request::{LoginResponse, UserLoginRequest};
 use crate::models::register::request::UserRegisterRequest;
 use crate::models::register::response::RegisterResponse;
@@ -17,9 +18,12 @@ impl UserController {
 
 #[web::post("/login")]
 pub async fn handle_login(
-    service: web::types::State<UserService>,
+    service: web::types::State<Arc<Mutex<UserService>>>,
     req: Json<UserLoginRequest>,
 ) -> impl Responder {
+
+    let service = service.lock().unwrap();
+
     match service.login(req).await.unwrap() {
         LoginResponse::Token(token) => {
             // Return the token as a response
@@ -42,9 +46,10 @@ pub async fn handle_login(
 
 #[web::post("/register")]
 pub async fn handle_register(
-    service: web::types::State<UserService>,
+    service: web::types::State<Arc<Mutex<UserService>>>,
     req: Json<UserRegisterRequest>,
 ) -> impl Responder {
+    let service = service.lock().unwrap();
     // Pass request to service layer
     match service.register(req).await.unwrap() {
         RegisterResponse::UserAlreadyExists => {
