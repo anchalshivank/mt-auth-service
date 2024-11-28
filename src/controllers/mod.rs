@@ -1,10 +1,16 @@
-use std::sync::{Arc, Mutex};
-use crate::models::login::request::{LoginResponse, UserLoginRequest};
-use crate::models::register::request::UserRegisterRequest;
-use crate::models::register::response::RegisterResponse;
+mod response;
+
+use crate::models::{
+    login::{LoginErrorData, LoginResponse, LoginSuccessData, UserLoginRequest},
+    register::{RegisterErrorData, RegisterResponse, UserRegisterRequest}
+};
 use crate::services::UserService;
+use log::info;
 use ntex::web::types::Json;
 use ntex::web::{self, HttpResponse, Responder};
+use serde::Serialize;
+use std::sync::{Arc, Mutex};
+use crate::controllers::response::ApiResponse;
 
 pub struct UserController {
     service: UserService,
@@ -21,25 +27,34 @@ pub async fn handle_login(
     service: web::types::State<Arc<Mutex<UserService>>>,
     req: Json<UserLoginRequest>,
 ) -> impl Responder {
-
     let service = service.lock().unwrap();
 
     match service.login(req).await.unwrap() {
         LoginResponse::Token(token) => {
-            // Return the token as a response
-            HttpResponse::Ok().json(&token)
+            let data = LoginSuccessData { token };
+            // Explicitly specify both the success data type and the error type
+            HttpResponse::Ok().json(&ApiResponse::<LoginSuccessData, ()>::success("Login successful", data))
         }
         LoginResponse::InvalidPassword => {
-            // Respond with unauthorized if the password is incorrect
-            HttpResponse::Unauthorized().body("Invalid password")
+            let error_data = LoginErrorData {
+                code: "INVALID_PASSWORD".to_string(),
+                message: "The provided password is incorrect.".to_string(),
+            };
+            HttpResponse::Unauthorized().json(&ApiResponse::<(), LoginErrorData>::error("Login failed", error_data))
         }
         LoginResponse::UserNotFound => {
-            // Respond with not found if the user does not exist
-            HttpResponse::NotFound().body("User not found")
+            let error_data = LoginErrorData {
+                code: "USER_NOT_FOUND".to_string(),
+                message: "The user does not exist.".to_string(),
+            };
+            HttpResponse::NotFound().json(&ApiResponse::<(), LoginErrorData>::error("Login failed", error_data))
         }
         LoginResponse::Error(err) => {
-            // Handle errors (internal server error or unknown errors)
-            HttpResponse::InternalServerError().body(format!("Error: {}", err))
+            let error_data = LoginErrorData {
+                code: "INTERNAL_ERROR".to_string(),
+                message: format!("An unexpected error occurred: {}", err),
+            };
+            HttpResponse::InternalServerError().json(&ApiResponse::<(), LoginErrorData>::error("Login failed", error_data))
         }
     }
 }
@@ -49,20 +64,30 @@ pub async fn handle_register(
     service: web::types::State<Arc<Mutex<UserService>>>,
     req: Json<UserRegisterRequest>,
 ) -> impl Responder {
+    info!("Registering user");
+
     let service = service.lock().unwrap();
-    // Pass request to service layer
+
     match service.register(req).await.unwrap() {
         RegisterResponse::UserAlreadyExists => {
-            // Respond with conflict if the user already exists
-            HttpResponse::Conflict().body("User already exists")
+            info!("User already exists");
+            let error_data = RegisterErrorData {
+                code: "USER_ALREADY_EXISTS".to_string(),
+                message: "The username or email already exists.".to_string(),
+            };
+            HttpResponse::Conflict().json(&ApiResponse::<(), RegisterErrorData>::error("Registration failed", error_data))
         }
         RegisterResponse::UserSuccessfullyRegistered => {
-            // Respond with success if registration is successful
-            HttpResponse::Ok().body("User successfully registered")
+            info!("User registered successfully");
+            HttpResponse::Ok().json(&ApiResponse::<(), ()>::success("User successfully registered", ()))
         }
         RegisterResponse::Error(err) => {
-            // Handle errors (internal server error or unknown errors)
-            HttpResponse::InternalServerError().body(format!("Error: {}", err))
+            info!("Error: {}", err);
+            let error_data = RegisterErrorData {
+                code: "INTERNAL_ERROR".to_string(),
+                message: format!("An unexpected error occurred: {}", err),
+            };
+            HttpResponse::InternalServerError().json(&ApiResponse::<(), RegisterErrorData>::error("Registration failed", error_data))
         }
     }
 }

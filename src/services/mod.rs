@@ -1,8 +1,8 @@
-use crate::models::login::request::LoginResponse::{Error, InvalidPassword, Token, UserNotFound};
-use crate::models::login::request::{LoginResponse, UserLoginRequest};
-use crate::models::register::request::UserRegisterRequest;
-use crate::models::register::response::RegisterResponse;
-use crate::models::register::response::RegisterResponse::{
+use crate::models::login::LoginResponse::{Error, InvalidPassword, Token, UserNotFound};
+use crate::models::login::{LoginResponse, UserLoginRequest};
+use crate::models::register::UserRegisterRequest;
+use crate::models::register::RegisterResponse;
+use crate::models::register::RegisterResponse::{
     UserAlreadyExists, UserSuccessfullyRegistered,
 };
 use crate::repositories::UserRepository;
@@ -10,7 +10,7 @@ use crate::utils::crypt::{hash_password, is_valid};
 use ntex::web::error::BlockingError;
 use ntex::web::types::Json;
 use std::sync::{Arc, Mutex};
-
+use log::info;
 
 #[derive(Clone)]
 pub struct UserService {
@@ -59,6 +59,8 @@ impl UserService {
         &self,
         req: Json<UserRegisterRequest>,
     ) -> Result<RegisterResponse, BlockingError<std::io::Error>> {
+
+        info!("Service register");
         let username = req.username.clone();
         let password = req.password.clone();
         let license_no = req.license_no.clone();
@@ -68,6 +70,7 @@ impl UserService {
 
         // Check if user exists
         if self.user_exists(username.clone()).await {
+            info!("user exists");
             return Ok(UserAlreadyExists);
         }
 
@@ -82,9 +85,10 @@ impl UserService {
             digi_signature,
         };
 
-        match self.repository.lock(){
+        match &self.repository.lock(){
 
             Ok(repository) => {
+
                 match repository.register(user_req).await {
                     Ok(_) => Ok(UserSuccessfullyRegistered),
                     Err(err) => Ok(RegisterResponse::Error(err.to_string())),

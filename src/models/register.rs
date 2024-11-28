@@ -9,3 +9,14 @@ pub struct UserRegisterRequest {
     pub license_no: String,
     pub digi_signature: String,
 }
+pub enum RegisterResponse {
+    UserAlreadyExists,
+    UserSuccessfullyRegistered,
+    Error(String),
+}
+
+#[derive(Serialize)]
+pub struct RegisterErrorData {
+    pub code: String,
+    pub message: String,
+}

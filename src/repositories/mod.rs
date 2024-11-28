@@ -1,13 +1,12 @@
 use crate::database::DbPool;
-use crate::models::login::request::UserLoginRequest;
-use crate::models::register::request::UserRegisterRequest;
+use crate::models::login::UserLoginRequest;
+use crate::models::register::UserRegisterRequest;
 use crate::models::User;
 use diesel::result::Error;
 use diesel::{sql_query, RunQueryDsl};
 use ntex::http::error::BlockingError;
 use ntex::web;
 use std::sync::{Arc, Mutex};
-
 
 #[derive(Clone)]
 pub struct UserRepository {
@@ -33,13 +32,12 @@ impl UserRepository {
                     .await;
                 res
             }
-            Err(err) => Err(BlockingError::Canceled),
+            Err(_) => Err(BlockingError::Canceled),
         }
 
     }
 
     pub async fn register(&self, req: UserRegisterRequest) -> Result<usize, BlockingError<Error>> {
-        let db = self.pool.clone();
 
         match self.pool.lock(){
             Ok(db) => {
@@ -63,7 +61,7 @@ impl UserRepository {
 
 
             }
-            Err(err) => Err(BlockingError::Canceled),
+            Err(_) => Err(BlockingError::Canceled),
         }
 
 
@@ -71,7 +69,6 @@ impl UserRepository {
 
     pub async fn user_exists(&self, user_id: String) -> Result<Vec<User>, BlockingError<Error>> {
         // Lock the pool and get a connection before calling `web::block`
-        let db = self.pool.lock().map_err(|err| BlockingError::Error(err.to_string())).unwrap();
         match self.pool.lock() {
             Ok(db) => {
                 let db = db.clone();

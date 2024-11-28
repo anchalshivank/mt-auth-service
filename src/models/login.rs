@@ -12,3 +12,14 @@ pub enum LoginResponse {
     UserNotFound,
     Error(String),
 }
+
+#[derive(Serialize)]
+pub struct LoginSuccessData {
+    pub(crate) token: String,
+}
+
+#[derive(Serialize)]
+pub struct LoginErrorData {
+    pub(crate) code: String,
+    pub(crate) message: String,
+}
