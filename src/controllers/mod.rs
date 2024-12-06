@@ -22,6 +22,12 @@ impl UserController {
     }
 }
 
+
+#[web::get("/health")]
+pub async fn health() -> impl Responder {
+    HttpResponse::Ok().body("ok")
+}
+
 #[web::post("/login")]
 pub async fn handle_login(
     service: web::types::State<Arc<Mutex<UserService>>>,
