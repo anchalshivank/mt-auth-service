@@ -1,5 +1,8 @@
-# Use the official Rust image as the base
+# Stage 1: Build the application
 FROM rust:latest AS builder
+
+# Install the PostgreSQL client development library
+RUN apt-get update && apt-get install -y libpq-dev
 
 # Set the working directory inside the container
 WORKDIR /usr/src/app
@@ -11,7 +14,11 @@ COPY src ./src
 # Build the application in release mode
 RUN cargo build --release
 
+# Stage 2: Runtime environment
 FROM ubuntu:latest
+
+# Install the PostgreSQL runtime library
+RUN apt-get update && apt-get install -y libpq5 && apt-get clean
 
 # Set the working directory for the application
 WORKDIR /app
@@ -24,4 +31,3 @@ EXPOSE 8080
 
 # Set the default command to run the application
 CMD ["./auth-service"]
-
