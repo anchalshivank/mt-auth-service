@@ -26,7 +26,7 @@ async fn main() -> std::io::Result<()> {
     info!("Logger initialized!");
 
     let pool = Arc::new(Mutex::new(database::establish_connection()));
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8083));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
 
     let user_repository = Arc::new(Mutex::new(UserRepository::new(pool.clone())));
     let user_service = Arc::new(Mutex::new(UserService::new(user_repository)));
