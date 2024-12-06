@@ -7,7 +7,7 @@ mod repositories;
 
 mod controllers;
 
-use crate::controllers::{handle_login, handle_register};
+use crate::controllers::{handle_login, handle_register, health};
 use crate::repositories::UserRepository;
 use crate::services::UserService;
 use dotenv::dotenv;
@@ -34,6 +34,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .state(user_service.clone())
+            .service(health)
             .service(handle_login)
             .service(handle_register)
             .wrap(Logger::default())
