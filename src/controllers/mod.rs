@@ -97,3 +97,9 @@ pub async fn handle_register(
         }
     }
 }
+
+#[web::post("/auth-qr")]
+pub async fn handle_qr_code(
+    service: web::types::State<Arc<Mutex<UserService>>>,
+    req: Json<QrCodeRequest>
+)
