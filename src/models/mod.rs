@@ -3,6 +3,7 @@ use serde::Deserialize;
 
 pub mod login;
 pub mod register;
+pub mod notify_machine;
 
 #[derive(QueryableByName, Deserialize)]
 pub struct User {
