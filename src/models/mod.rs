@@ -2,9 +2,9 @@ use diesel::{QueryableByName, Selectable};
 use serde::Deserialize;
 
 pub mod login;
-pub mod register;
-pub mod notify_machine;
 pub mod machine;
+pub mod notify_machine;
+pub mod register;
 
 #[derive(QueryableByName, Deserialize)]
 pub struct User {

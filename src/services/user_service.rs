@@ -1,17 +1,14 @@
-
 use crate::models::login::LoginResponse::{Error, InvalidPassword, Token, UserNotFound};
 use crate::models::login::{LoginResponse, UserLoginRequest};
-use crate::models::register::UserRegisterRequest;
 use crate::models::register::RegisterResponse;
-use crate::models::register::RegisterResponse::{
-    UserAlreadyExists, UserSuccessfullyRegistered,
-};
+use crate::models::register::RegisterResponse::{UserAlreadyExists, UserSuccessfullyRegistered};
+use crate::models::register::UserRegisterRequest;
 use crate::repositories::user_repository::UserRepository;
 use crate::utils::crypt::{hash_password, is_valid};
+use log::info;
 use ntex::web::error::BlockingError;
 use ntex::web::types::Json;
 use std::sync::{Arc, Mutex};
-use log::info;
 
 #[derive(Clone)]
 pub struct UserService {
@@ -27,12 +24,10 @@ impl UserService {
         &self,
         req: Json<UserLoginRequest>,
     ) -> Result<LoginResponse, BlockingError<std::io::Error>> {
-
         let password = req.password.clone();
 
-        match &self.repository.lock(){
+        match &self.repository.lock() {
             Ok(repository) => {
-
                 match repository.login(req.into_inner()).await {
                     Ok(users) => {
                         if let Some(user) = users.first() {
@@ -52,7 +47,7 @@ impl UserService {
                     Err(err) => Ok(Error(err.to_string())),
                 }
             }
-            Err(err) => {Ok(Error(err.to_string()))}
+            Err(err) => Ok(Error(err.to_string())),
         }
     }
 
@@ -60,7 +55,6 @@ impl UserService {
         &self,
         req: Json<UserRegisterRequest>,
     ) -> Result<RegisterResponse, BlockingError<std::io::Error>> {
-
         info!("Service register");
         let username = req.username.clone();
         let password = req.password.clone();
@@ -86,34 +80,22 @@ impl UserService {
             digi_signature,
         };
 
-        match &self.repository.lock(){
-
-            Ok(repository) => {
-
-                match repository.register(user_req).await {
-                    Ok(_) => Ok(UserSuccessfullyRegistered),
-                    Err(err) => Ok(RegisterResponse::Error(err.to_string())),
-                }
-            }
-            Err(err) => {
-                Ok(RegisterResponse::Error(err.to_string()))
-            }
+        match &self.repository.lock() {
+            Ok(repository) => match repository.register(user_req).await {
+                Ok(_) => Ok(UserSuccessfullyRegistered),
+                Err(err) => Ok(RegisterResponse::Error(err.to_string())),
+            },
+            Err(err) => Ok(RegisterResponse::Error(err.to_string())),
         }
-
     }
 
     async fn user_exists(&self, user_id: String) -> bool {
-        match self.repository.lock(){
-            Ok(repository) => {
-                match repository.user_exists(user_id).await {
-                    Ok(results) => results.len() > 0,
-                    Err(_) => false,
-                }
-            }
-            Err(_err) => {
-                false
-            }
+        match self.repository.lock() {
+            Ok(repository) => match repository.user_exists(user_id).await {
+                Ok(results) => results.len() > 0,
+                Err(_) => false,
+            },
+            Err(_err) => false,
         }
-
     }
 }

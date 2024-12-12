@@ -1,11 +1,13 @@
-use std::sync::{Arc, Mutex};
+use crate::controllers::response::ApiResponse;
+use crate::models::notify_machine::{
+    NotifyMachineErrorData, NotifyMachineRequest, NotifyMachineResponse,
+};
+use crate::services::Services;
 use log::info;
 use ntex::web;
-use ntex::web::{HttpResponse, Responder};
 use ntex::web::types::Json;
-use crate::models::notify_machine::{NotifyMachineErrorData, NotifyMachineRequest, NotifyMachineResponse};
-use crate::controllers::response::ApiResponse;
-use crate::services::Services;
+use ntex::web::{HttpResponse, Responder};
+use std::sync::{Arc, Mutex};
 
 #[web::post("/auth-qr")]
 pub async fn handle_qr_code(
@@ -41,20 +43,24 @@ pub async fn handle_qr_code(
                 code: "NOTIFICATION_ERROR".to_string(),
                 message: format!("An unexpected error occurred: {}", err),
             };
-            HttpResponse::InternalServerError().json(&ApiResponse::<(), NotifyMachineErrorData>::error(
-                "Notification failed",
-                error_data,
-            ))
+            HttpResponse::InternalServerError().json(
+                &ApiResponse::<(), NotifyMachineErrorData>::error(
+                    "Notification failed",
+                    error_data,
+                ),
+            )
         }
         Err(err) => {
             let error_data = NotifyMachineErrorData {
                 code: "NOTIFICATION_EXCEPTION".to_string(),
                 message: format!("An exception occurred: {}", err),
             };
-            HttpResponse::InternalServerError().json(&ApiResponse::<(), NotifyMachineErrorData>::error(
-                "Notification failed",
-                error_data,
-            ))
+            HttpResponse::InternalServerError().json(
+                &ApiResponse::<(), NotifyMachineErrorData>::error(
+                    "Notification failed",
+                    error_data,
+                ),
+            )
         }
     }
 }

@@ -19,27 +19,24 @@ impl UserRepository {
     }
 
     pub async fn login(&self, req: UserLoginRequest) -> Result<Vec<User>, BlockingError<Error>> {
-        match self.pool.lock(){
-            Ok(db) =>
-                {
-                    let db = db.clone();
-                    let res = web::block(move || {
-                        let mut conn = db.get().unwrap();
-                        sql_query("SELECT id, password FROM users WHERE id = $1")
-                            .bind::<diesel::sql_types::Integer, _>(req.user_id)
-                            .load::<User>(&mut conn)
-                    })
-                        .await;
-                    res
-                }
+        match self.pool.lock() {
+            Ok(db) => {
+                let db = db.clone();
+                let res = web::block(move || {
+                    let mut conn = db.get().unwrap();
+                    sql_query("SELECT id, password FROM users WHERE id = $1")
+                        .bind::<diesel::sql_types::Integer, _>(req.user_id)
+                        .load::<User>(&mut conn)
+                })
+                .await;
+                res
+            }
             Err(_) => Err(BlockingError::Canceled),
         }
-
     }
 
     pub async fn register(&self, req: UserRegisterRequest) -> Result<usize, BlockingError<Error>> {
-
-        match self.pool.lock(){
+        match self.pool.lock() {
             Ok(db) => {
                 let db = db.clone();
                 let res = web::block(move || {
@@ -58,13 +55,9 @@ impl UserRepository {
                 })
                     .await;
                 res
-
-
             }
             Err(_) => Err(BlockingError::Canceled),
         }
-
-
     }
 
     pub async fn user_exists(&self, user_id: String) -> Result<Vec<User>, BlockingError<Error>> {
@@ -74,20 +67,16 @@ impl UserRepository {
                 let db = db.clone();
                 // Now pass the connection into the blocking task to perform the query
                 let res = web::block(move || {
-                    let mut conn = db.get().unwrap();  // Get a connection from the pool
+                    let mut conn = db.get().unwrap(); // Get a connection from the pool
                     sql_query("SELECT user_id FROM users WHERE user_id = $1")
                         .bind::<diesel::sql_types::Text, _>(user_id)
                         .load::<User>(&mut conn)
                 })
-                    .await;
+                .await;
 
                 res
-
-
             }
-            Err(err) => {Err(BlockingError::Canceled)}
+            Err(err) => Err(BlockingError::Canceled),
         }
-
     }
-
 }

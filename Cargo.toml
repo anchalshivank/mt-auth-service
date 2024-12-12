@@ -17,3 +17,4 @@ uuid = "1.11.0"
 r2d2_postgres = "0.18.1"
 log = "0.4.22"
 reqwest = {version = "0.12.9", features = ["json"]}
+chrono = "0.4.39"

@@ -1,15 +1,14 @@
-use std::sync::{Arc, Mutex};
-use log::info;
-use ntex::web;
-use ntex::web::{HttpResponse, Responder};
-use ntex::web::types::Json;
-use crate::models::
-{   register::{RegisterErrorData, RegisterResponse, UserRegisterRequest},
-    login::{LoginErrorData, LoginResponse, LoginSuccessData, UserLoginRequest}
+use crate::controllers::response::ApiResponse;
+use crate::models::{
+    login::{LoginErrorData, LoginResponse, LoginSuccessData, UserLoginRequest},
+    register::{RegisterErrorData, RegisterResponse, UserRegisterRequest},
 };
 use crate::services::Services;
-use crate::controllers::response::ApiResponse;
-
+use log::info;
+use ntex::web;
+use ntex::web::types::Json;
+use ntex::web::{HttpResponse, Responder};
+use std::sync::{Arc, Mutex};
 
 #[web::get("/health")]
 pub async fn health() -> impl Responder {
@@ -28,28 +27,40 @@ pub async fn handle_login(
         LoginResponse::Token(token) => {
             let data = LoginSuccessData { token };
             // Explicitly specify both the success data type and the error type
-            HttpResponse::Ok().json(&ApiResponse::<LoginSuccessData, ()>::success("Login successful", Some(data)))
+            HttpResponse::Ok().json(&ApiResponse::<LoginSuccessData, ()>::success(
+                "Login successful",
+                Some(data),
+            ))
         }
         LoginResponse::InvalidPassword => {
             let error_data = LoginErrorData {
                 code: "INVALID_PASSWORD".to_string(),
                 message: "The provided password is incorrect.".to_string(),
             };
-            HttpResponse::Unauthorized().json(&ApiResponse::<(), LoginErrorData>::error("Login failed", error_data))
+            HttpResponse::Unauthorized().json(&ApiResponse::<(), LoginErrorData>::error(
+                "Login failed",
+                error_data,
+            ))
         }
         LoginResponse::UserNotFound => {
             let error_data = LoginErrorData {
                 code: "USER_NOT_FOUND".to_string(),
                 message: "The user does not exist.".to_string(),
             };
-            HttpResponse::NotFound().json(&ApiResponse::<(), LoginErrorData>::error("Login failed", error_data))
+            HttpResponse::NotFound().json(&ApiResponse::<(), LoginErrorData>::error(
+                "Login failed",
+                error_data,
+            ))
         }
         LoginResponse::Error(err) => {
             let error_data = LoginErrorData {
                 code: "INTERNAL_ERROR".to_string(),
                 message: format!("An unexpected error occurred: {}", err),
             };
-            HttpResponse::InternalServerError().json(&ApiResponse::<(), LoginErrorData>::error("Login failed", error_data))
+            HttpResponse::InternalServerError().json(&ApiResponse::<(), LoginErrorData>::error(
+                "Login failed",
+                error_data,
+            ))
         }
     }
 }
@@ -71,11 +82,17 @@ pub async fn handle_register(
                 code: "USER_ALREADY_EXISTS".to_string(),
                 message: "The username or email already exists.".to_string(),
             };
-            HttpResponse::Conflict().json(&ApiResponse::<(), RegisterErrorData>::error("Registration failed", error_data))
+            HttpResponse::Conflict().json(&ApiResponse::<(), RegisterErrorData>::error(
+                "Registration failed",
+                error_data,
+            ))
         }
         RegisterResponse::UserSuccessfullyRegistered => {
             info!("User registered successfully");
-            HttpResponse::Ok().json(&ApiResponse::<(), ()>::success("User successfully registered", None))
+            HttpResponse::Ok().json(&ApiResponse::<(), ()>::success(
+                "User successfully registered",
+                None,
+            ))
         }
         RegisterResponse::Error(err) => {
             info!("Error: {}", err);
@@ -83,7 +100,10 @@ pub async fn handle_register(
                 code: "INTERNAL_ERROR".to_string(),
                 message: format!("An unexpected error occurred: {}", err),
             };
-            HttpResponse::InternalServerError().json(&ApiResponse::<(), RegisterErrorData>::error("Registration failed", error_data))
+            HttpResponse::InternalServerError().json(&ApiResponse::<(), RegisterErrorData>::error(
+                "Registration failed",
+                error_data,
+            ))
         }
     }
 }

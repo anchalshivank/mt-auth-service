@@ -1,20 +1,18 @@
 use crate::database::DbPool;
 use crate::models::machine::{DeployMachineRequest, MaintenanceRequest, RegisterMachineRequest};
+use crate::models::CountQueryResult;
 use diesel::result::Error;
 use diesel::{sql_query, QueryableByName, RunQueryDsl, Selectable};
+use log::info;
 use ntex::http::error::BlockingError;
 use ntex::web;
 use std::sync::{Arc, Mutex};
-use log::info;
-use crate::models::CountQueryResult;
+use chrono::{Duration, Utc};
 
 #[derive(Clone)]
 pub struct MachineRepository {
-    pub pool: Arc<Mutex<DbPool>>
+    pub pool: Arc<Mutex<DbPool>>,
 }
-
-
-
 
 impl MachineRepository {
     pub fn new(pool: Arc<Mutex<DbPool>>) -> MachineRepository {
@@ -26,9 +24,10 @@ impl MachineRepository {
         let mut conn = db.get().map_err(|_| Error::RollbackTransaction)?;
 
         // Ensure machine is registered and not under maintenance
-        let exists = sql_query("SELECT COUNT(*) FROM machines WHERE id = $1 AND under_maintenance = TRUE")
-            .bind::<diesel::sql_types::Integer, _>(req.machine_id)
-            .get_result::<CountQueryResult>(&mut conn)?;
+        let exists =
+            sql_query("SELECT COUNT(*) FROM machines WHERE id = $1 AND under_maintenance = TRUE")
+                .bind::<diesel::sql_types::Integer, _>(req.machine_id)
+                .get_result::<CountQueryResult>(&mut conn)?;
 
         info!("Exists : {}", exists.count);
 
@@ -47,9 +46,10 @@ impl MachineRepository {
         let mut conn = db.get().map_err(|_| Error::RollbackTransaction)?;
 
         // Ensure machine is not already under maintenance
-        let not_under_maintenance = sql_query("SELECT COUNT(*) FROM machines WHERE id = $1 AND under_maintenance = FALSE")
-            .bind::<diesel::sql_types::Integer, _>(req.machine_id)
-            .get_result::<CountQueryResult>(&mut conn)?;
+        let not_under_maintenance =
+            sql_query("SELECT COUNT(*) FROM machines WHERE id = $1 AND under_maintenance = FALSE")
+                .bind::<diesel::sql_types::Integer, _>(req.machine_id)
+                .get_result::<CountQueryResult>(&mut conn)?;
 
         if not_under_maintenance.count == 0 {
             return Err(Error::RollbackTransaction);
@@ -67,22 +67,27 @@ impl MachineRepository {
             .execute(&mut conn)
     }
 
-
-    pub async fn register(&self, req: RegisterMachineRequest) -> Result<usize, BlockingError<Error>> {
+    pub async fn register(
+        &self,
+    ) -> Result<usize, BlockingError<Error>> {
         match self.pool.lock() {
             Ok(db) => {
                 let db = db.clone();
                 let result = web::block(move || {
                     let mut conn = db.get().unwrap();
-                    sql_query("INSERT INTO machines (under_maintenance, next_service) VALUES (FALSE, $1)")
-                        .bind::<diesel::sql_types::Text, _>(req.next_service)
-                        .execute(&mut conn)
+                    let now = Utc::now();
+                    let next_service = now + Duration::days(6*30); // Approximating 6 months
+                    sql_query(
+                        "INSERT INTO machines (under_maintenance, next_service, last_service) VALUES (FALSE, $1::timestamp, $2::timestamp)",
+                    )
+                    .bind::<diesel::sql_types::Text, _>(next_service.to_string())
+                        .bind::<diesel::sql_types::Text, _>(now.to_rfc3339())
+                    .execute(&mut conn)
                 })
-                    .await;
+                .await;
                 result
             }
             Err(_) => Err(BlockingError::Canceled),
         }
     }
-
 }

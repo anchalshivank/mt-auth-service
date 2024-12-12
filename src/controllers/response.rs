@@ -1,5 +1,5 @@
-use serde::Serialize;
 use serde::ser::{SerializeStruct, Serializer};
+use serde::Serialize;
 
 #[derive(Debug)]
 pub struct ApiResponse<T, E> {

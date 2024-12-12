@@ -8,18 +8,13 @@ pub struct NotifyMachineRequest {
 }
 
 pub enum NotifyMachineResponse {
-
     Success,
     Failure,
-    Error(String)
-
+    Error(String),
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct NotifyMachineErrorData {
-
     pub(crate) code: String,
-    pub(crate) message: String
-
+    pub(crate) message: String,
 }
-

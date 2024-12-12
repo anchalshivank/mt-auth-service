@@ -1,25 +1,26 @@
+use crate::models::notify_machine::{NotifyMachineRequest, NotifyMachineResponse};
+use reqwest::Client;
 use std::net::SocketAddr;
 use std::sync::Arc;
-use reqwest::Client;
-use crate::models::notify_machine::{NotifyMachineRequest, NotifyMachineResponse};
 
 #[derive(Clone)]
 pub struct NotifyService {
-
     addr: SocketAddr,
-    client: Arc<Client>
-
+    client: Arc<Client>,
 }
 
 impl NotifyService {
-
     pub fn new(addr: SocketAddr) -> Self {
-        Self { addr,
-        client: Arc::new(Client::new())
+        Self {
+            addr,
+            client: Arc::new(Client::new()),
         }
     }
 
-    pub async fn notify_machine(&self, qr: NotifyMachineRequest) -> Result<NotifyMachineResponse, String> {
+    pub async fn notify_machine(
+        &self,
+        qr: NotifyMachineRequest,
+    ) -> Result<NotifyMachineResponse, String> {
         // Construct the URL for the endpoint
         let url = format!("http://{}/notify-machine", self.addr);
 
@@ -39,14 +40,18 @@ impl NotifyService {
             .await;
 
         match response {
-            Ok(resp) if resp.status().is_success() => {
-                Ok(NotifyMachineResponse::Success)
-            }
+            Ok(resp) if resp.status().is_success() => Ok(NotifyMachineResponse::Success),
             Ok(resp) => {
-                let error_message = resp.text().await.unwrap_or_else(|_| "Unknown error".to_string());
+                let error_message = resp
+                    .text()
+                    .await
+                    .unwrap_or_else(|_| "Unknown error".to_string());
                 Ok(NotifyMachineResponse::Error(error_message))
             }
-            Err(err) => Err(format!("Error occurred while sending notification: {:?}", err)),
+            Err(err) => Err(format!(
+                "Error occurred while sending notification: {:?}",
+                err
+            )),
         }
     }
 }
