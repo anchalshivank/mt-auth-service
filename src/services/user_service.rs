@@ -6,7 +6,7 @@ use crate::models::register::RegisterResponse;
 use crate::models::register::RegisterResponse::{
     UserAlreadyExists, UserSuccessfullyRegistered,
 };
-use crate::repositories::UserRepository;
+use crate::repositories::user_repository::UserRepository;
 use crate::utils::crypt::{hash_password, is_valid};
 use ntex::web::error::BlockingError;
 use ntex::web::types::Json;

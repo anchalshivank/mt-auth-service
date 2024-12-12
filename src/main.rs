@@ -7,8 +7,10 @@ mod repositories;
 
 mod controllers;
 
-use crate::controllers::{handle_login, handle_register, health, handle_qr_code};
-use crate::repositories::UserRepository;
+use crate::repositories::{
+    user_repository::UserRepository,
+    machine_repository::MachineRepository
+};
 use crate::services::{
     Services,
     user_service::UserService,
@@ -22,6 +24,13 @@ use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
+use crate::controllers::{
+    user_controller::health,
+    notify_controller::handle_qr_code,
+    machine_controller::{deploy_machine,register_machine, take_machine_for_maintenance}
+};
+use crate::controllers::user_controller::{handle_login, handle_register};
+use crate::services::machine_service::MachineService;
 
 #[ntex::main]
 async fn main() -> std::io::Result<()> {
@@ -38,10 +47,13 @@ async fn main() -> std::io::Result<()> {
     let user_repository = Arc::new(Mutex::new(UserRepository::new(pool.clone())));
     let user_service = Arc::new(Mutex::new(UserService::new(user_repository)));
     let notify_service = Arc::new(Mutex::new(NotifyService::new(notify_service_addr)));
+    let machine_repository = Arc::new(Mutex::new(MachineRepository::new(pool.clone())));
+    let machine_service = Arc::new(Mutex::new(MachineService::new(machine_repository)));
 
     let services = Arc::new(Mutex::new(Services {
         user_service,
         notify_service,
+        machine_service,
     }));
 
     info!("Starting server on addr {}", addr);
@@ -52,6 +64,9 @@ async fn main() -> std::io::Result<()> {
             .service(handle_login)
             .service(handle_register)
             .service(handle_qr_code)
+            .service(deploy_machine)
+            .service(take_machine_for_maintenance)
+            .service(register_machine)
             .wrap(Logger::default())
     })
         .bind(addr)?
