@@ -5,8 +5,7 @@ use crate::models::machine::{
 use crate::services::Services;
 use ntex::web;
 use ntex::web::types::Json;
-use ntex::web::{resource, HttpResponse, Responder};
-use std::io::Error;
+use ntex::web::{HttpResponse, Responder};
 use std::sync::{Arc, Mutex};
 
 #[web::post("/deploy")]

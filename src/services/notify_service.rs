@@ -31,6 +31,7 @@ impl NotifyService {
             message: qr.message.clone(),
         };
 
+
         // Send the POST request
         let response = self
             .client

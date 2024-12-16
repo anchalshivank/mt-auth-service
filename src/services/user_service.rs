@@ -89,13 +89,22 @@ impl UserService {
         }
     }
 
-    async fn user_exists(&self, user_id: String) -> bool {
+    pub async fn user_exists(&self, user_id: String) -> bool {
         match self.repository.lock() {
-            Ok(repository) => match repository.user_exists(user_id).await {
-                Ok(results) => results.len() > 0,
-                Err(_) => false,
+            Ok(repository) => match repository.user_exists(user_id.parse().unwrap()).await {
+                Ok(results) => {
+                    info!("User exists");
+                    results.len() > 0
+                },
+                Err(err) => {
+                    info!("User not found {:?}", err);
+                    false
+                },
             },
-            Err(_err) => false,
+            Err(err) => {
+                info!("{:?}",err);
+                false
+            },
         }
     }
 }

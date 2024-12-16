@@ -7,6 +7,7 @@ use diesel::{sql_query, RunQueryDsl};
 use ntex::http::error::BlockingError;
 use ntex::web;
 use std::sync::{Arc, Mutex};
+use log::info;
 
 #[derive(Clone)]
 pub struct UserRepository {
@@ -60,7 +61,7 @@ impl UserRepository {
         }
     }
 
-    pub async fn user_exists(&self, user_id: String) -> Result<Vec<User>, BlockingError<Error>> {
+    pub async fn user_exists(&self, user_id: i32) -> Result<Vec<User>, BlockingError<Error>> {
         // Lock the pool and get a connection before calling `web::block`
         match self.pool.lock() {
             Ok(db) => {
@@ -68,13 +69,14 @@ impl UserRepository {
                 // Now pass the connection into the blocking task to perform the query
                 let res = web::block(move || {
                     let mut conn = db.get().unwrap(); // Get a connection from the pool
-                    sql_query("SELECT user_id FROM users WHERE user_id = $1")
-                        .bind::<diesel::sql_types::Text, _>(user_id)
+                    sql_query("SELECT id, password FROM users WHERE id = $1")
+                        .bind::<diesel::sql_types::Integer, _>(user_id)
                         .load::<User>(&mut conn)
                 })
-                .await;
+                .await?;
 
-                res
+                info!("{}", res.clone().len());
+                Ok(res)
             }
             Err(err) => Err(BlockingError::Canceled),
         }

@@ -48,7 +48,7 @@ async fn main() -> std::io::Result<()> {
     let notify_service = Arc::new(Mutex::new(NotifyService::new(notify_service_addr)));
     let machine_repository = Arc::new(Mutex::new(MachineRepository::new(pool.clone())));
     let machine_service = Arc::new(Mutex::new(MachineService::new(machine_repository)));
-
+    info!("NOTIFY_SERVICE_ADDR {}", notify_service_addr);
     let services = Arc::new(Mutex::new(Services {
         user_service,
         notify_service,

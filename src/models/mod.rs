@@ -6,7 +6,7 @@ pub mod machine;
 pub mod notify_machine;
 pub mod register;
 
-#[derive(QueryableByName, Deserialize)]
+#[derive(QueryableByName, Deserialize, Clone)]
 pub struct User {
     #[diesel(sql_type = diesel::sql_types::Integer)] // Correct type for integer ID
     pub(crate) id: i32, // Use `i32` for Postgres integer type
