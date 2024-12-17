@@ -5,17 +5,19 @@ use crate::models::notify_machine::{
 use crate::services::Services;
 use log::info;
 use ntex::web;
-use ntex::web::types::Json;
+use ntex::web::types::{Json, Query};
 use ntex::web::{HttpResponse, Responder};
 use std::sync::{Arc, Mutex};
 use crate::models::login::LoginErrorData;
 
-#[web::post("/auth-qr")]
+#[web::get("/auth-qr")]
 pub async fn handle_qr_code(
     services: web::types::State<Arc<Mutex<Services>>>,
-    req: Json<NotifyMachineRequest>,
+    req: Query<NotifyMachineRequest>,
 ) -> impl Responder {
-    info!("Handling QR code authentication");
+    info!("Handling req {:?}", req);
+    let req = req.into_inner();
+    info!("Handling QR code authentication {:?}", req);
 
     let services = services.lock().unwrap();
     let service = services.notify_service.lock().unwrap();

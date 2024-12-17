@@ -91,7 +91,15 @@ impl UserService {
 
     pub async fn user_exists(&self, user_id: String) -> bool {
         match self.repository.lock() {
-            Ok(repository) => match repository.user_exists(user_id.parse().unwrap()).await {
+            Ok(repository) => match repository.user_exists(match user_id.parse(){
+
+                Ok(id) => id,
+                Err(err) => {
+                    log::error!("Invalid user_id: expected a number, got '{}' and error {}", user_id, err);
+                    0
+                }
+
+            }).await {
                 Ok(results) => {
                     info!("User exists");
                     results.len() > 0
