@@ -30,13 +30,8 @@ jobs:
 
       - name: Build and Push auth-service
         run: |
-          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/auth-service ./auth-service
+          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/auth-service .
           docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/auth-service
-
-      - name: Build and Push notify-service
-        run: |
-          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/notify-service ./notify-service
-          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/notify-service
 
       - name: Connect to GKE
         run: |
