@@ -26,6 +26,8 @@ WORKDIR /app
 # Copy the compiled binary from the builder stage
 COPY --from=builder /usr/src/app/target/release/auth-service .
 
+ENV RUST_LOG=debug
+
 # Expose the port your application listens on
 EXPOSE 8080
 
