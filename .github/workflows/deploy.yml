@@ -15,7 +15,7 @@ jobs:
 
       - name: Inject GCP project ID into manifests
         run: |
-          sed -i "s|\\$PROJECT_ID|${{ secrets.GCP_PROJECT_ID }}|g" k8s/*.yaml
+          sed -i "s|\$PROJECT_ID|${{ secrets.GCP_PROJECT_ID }}|g" k8s/*.yaml
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
