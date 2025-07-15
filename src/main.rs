@@ -41,8 +41,8 @@ async fn main() -> std::io::Result<()> {
 
     let notify_service_addr =
         std::env::var("NOTIFY_SERVICE_ADDR").unwrap_or_else(|_| "0.0.0.0:8081".to_string());
-    let notify_service_addr =
-        SocketAddr::from_str(notify_service_addr.as_str()).expect("Invalid NOTIFY_SERVICE_ADDR");
+    // let notify_service_addr =
+    //     SocketAddr::from_str(notify_service_addr.as_str()).expect("Invalid NOTIFY_SERVICE_ADDR");
     let user_repository = Arc::new(Mutex::new(UserRepository::new(pool.clone())));
     let user_service = Arc::new(Mutex::new(UserService::new(user_repository)));
     let notify_service = Arc::new(Mutex::new(NotifyService::new(notify_service_addr)));
