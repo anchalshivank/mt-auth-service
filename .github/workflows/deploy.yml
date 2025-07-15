@@ -37,10 +37,10 @@ jobs:
           docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/auth-service .
           docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/auth-service
 
-      - name: Connect to GKE
-        run: |
-          gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --zone ${{ secrets.GKE_ZONE }}
+      # - name: Connect to GKE
+      #   run: |
+      #     gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --zone ${{ secrets.GKE_ZONE }}
 
-      - name: Deploy to GKE
-        run: |
-          kubectl apply -f ./k8s/
+      # - name: Deploy to GKE
+      #   run: |
+      #     kubectl apply -f ./k8s/
