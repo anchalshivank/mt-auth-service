@@ -1,16 +1,18 @@
 use crate::models::notify_machine::{NotifyMachineRequest, NotifyMachineResponse};
+use log::info;
 use reqwest::Client;
 use std::net::SocketAddr;
 use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct NotifyService {
-    addr: SocketAddr,
+    addr: String,
     client: Arc<Client>,
 }
 
 impl NotifyService {
-    pub fn new(addr: SocketAddr) -> Self {
+    pub fn new(addr: String) -> Self {
+        info!("Notify addr is {:?}",addr );
         Self {
             addr,
             client: Arc::new(Client::new()),
@@ -22,7 +24,9 @@ impl NotifyService {
         qr: NotifyMachineRequest,
     ) -> Result<NotifyMachineResponse, String> {
         // Construct the URL for the endpoint
-        let url = format!("http://{}/notify-machine", self.addr);
+        // let url = format!("http://{}/notify-machine", self.addr);
+        let url = self.addr.to_string();
+
 
         // Prepare the request payload
         let payload = NotifyMachineRequest {
@@ -46,7 +50,7 @@ impl NotifyService {
                 let error_message = resp
                     .text()
                     .await
-                    .unwrap_or_else(|_| "Unknown error".to_string());
+                    .unwrap_or_else(|err| err.to_string());
                 Ok(NotifyMachineResponse::Error(error_message))
             }
             Err(err) => Err(format!(
